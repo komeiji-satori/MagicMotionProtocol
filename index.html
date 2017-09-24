@@ -1,0 +1,72 @@
+<script src="https://cdnjs.cat.net/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+<script src="https://cdnjs.cat.net/ajax/libs/jquery/3.2.1/jquery.js"></script>
+<script type="text/javascript"></script>
+<script>
+var socket;
+var connected = false;
+
+function getQueryString(name) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+    var queryStr = "";
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) {
+        queryStr = unescape(r[2]);
+        if (queryStr.indexOf("?") > 0) {
+            var strAry = queryStr.split("?")
+            queryStr = strAry[0];
+        }
+    } else {
+        queryStr = null;
+    }
+
+    return queryStr;
+}
+
+function connect(ip) {
+    socket = io.connect(ip);
+    socket.on("connect", function() {
+        connected = true;
+        console.log('ovo');
+        var room = getQueryString("room");
+        if (room != null) {
+            socket.emit("join", { room: String(room) });
+            socket.emit("action", { time_limit: "negotiation" });
+        }
+    });
+
+    socket.on("disconnect", function() {
+        connected = false;
+    });
+
+    socket.on("response", function(data) {
+        var result = JSON.parse(data.toString());
+        console.log(result);
+    });
+}
+
+function disconnect() {
+    socket.disconnect();
+}
+
+function getConnected() {
+    return connected;
+}
+
+function sendMeg(number) {
+    var response = socket.emit("action", { motor_level: number });
+    //console.log(response);
+}
+function owo(){
+  var random = Math.random().toString().split('.')[1].slice(1,3);
+  sendMeg(random);
+  console.log(random);
+  //console.log('喵');
+}
+</script>
+<button id="owo">喵/</button>
+<script type="text/javascript">
+$('#owo').on('click', function() {
+    connect("game.magicmotion.cn");
+    setInterval("owo()",300);
+})
+</script>
